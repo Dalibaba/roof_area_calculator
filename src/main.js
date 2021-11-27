@@ -10,11 +10,12 @@ Vue.use(VueGoogleMaps, {
   load: {
     key: process.env.VUE_APP_GOOGLE_API_KEY,
   },
-  installComponents: false,
+  installComponents: true,
 });
 
 Vue.component("google-map", VueGoogleMaps.Map);
-
+Vue.component("google-marker", VueGoogleMaps.Marker);
+Vue.component("google-polyline", VueGoogleMaps.Polyline);
 new Vue({
   render: (h) => h(App),
 }).$mount("#app");

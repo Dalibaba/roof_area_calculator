@@ -65,20 +65,37 @@
         </p>
       </div>
     </div>
+    <div class="container">
+      <button
+        type="button"
+        class="btn btn-success btn-sm"
+        @click="onClickClearMarkers"
+      >
+        Clear Markers
+      </button>
+    </div>
+    <div class="container"></div>
     <google-map
+      @click="onClickMap"
       :center="myCoordinates"
       :zoom="zoom"
       style="width: 70%; height: 500px; margin: 32px auto"
       ref="mapRef"
       @dragend="handleDrag"
     >
-      <div v-if="savedMarkers.length > 0"></div>
-      <GmapMarker
+      <!-- <div v-if="savedMarkers.length > 0"></div> -->
+      <google-polyline
+        v-bind:path.sync="paths"
+        v-bind:options="{ strokeColor: '#008000' }"
+        ref="polyline"
+        :editable="false"
+      ></google-polyline>
+      <google-marker
         :key="index"
         v-for="(m, index) in savedMarkers"
         :position="m.position"
         :clickable="true"
-        :draggable="true"
+        :draggable="false"
         @click="center = m.position"
       />
       ></google-map
@@ -88,6 +105,7 @@
 
 <script>
 import axios from "axios";
+
 export default {
   data() {
     return {
@@ -105,6 +123,7 @@ export default {
       zoom: 12,
       savedMarkers: [],
       address: "",
+      paths: [],
     };
   },
   created() {
@@ -140,11 +159,6 @@ export default {
       localStorage.zoom = zoom;
     },
     async onClickFind() {
-      console.log("hier", this.formData.city);
-      console.log("hier", this.formData.street);
-      console.log("hier", this.formData.houseNumber);
-      console.log("hier", this.formData.city);
-
       if (
         !this.formData.street ||
         !this.formData.city ||
@@ -165,10 +179,31 @@ export default {
       }
 
       const geocodedLocation = data.results[0];
-      console.log(geocodedLocation);
       this.myCoordinates.lat = geocodedLocation.geometry.location.lat;
       this.myCoordinates.lng = geocodedLocation.geometry.location.lng;
       this.zoom = 20;
+    },
+
+    onClickMap(e) {
+      var marker = {
+        position: e.latLng.toJSON(),
+      };
+      this.savedMarkers.push(marker);
+      let pathObject = {
+        lat: e.latLng.toJSON().lat,
+        lng: e.latLng.toJSON().lng,
+      };
+
+      if (this.paths.length == 0) {
+        this.paths.push(pathObject);
+        this.paths.push(pathObject);
+      } else {
+        this.paths.splice(this.paths.length - 1, 0, pathObject);
+      }
+    },
+    onClickClearMarkers() {
+      this.savedMarkers = [];
+      this.paths = [];
     },
   },
 
