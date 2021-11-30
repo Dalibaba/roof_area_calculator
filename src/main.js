@@ -16,6 +16,7 @@ Vue.use(VueGoogleMaps, {
 Vue.component("google-map", VueGoogleMaps.Map);
 Vue.component("google-marker", VueGoogleMaps.Marker);
 Vue.component("google-polyline", VueGoogleMaps.Polyline);
+Vue.component("google-polygon", VueGoogleMaps.Polygon);
 new Vue({
   render: (h) => h(App),
 }).$mount("#app");

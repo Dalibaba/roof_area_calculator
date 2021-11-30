@@ -83,33 +83,27 @@
       ref="mapRef"
       @dragend="handleDrag"
     >
-      <!-- <div v-if="savedMarkers.length > 0"></div> -->
-      <google-polyline
+      <!-- <google-polyline
         v-bind:path.sync="lineCoordinates"
         v-bind:options="{ strokeColor: '#008000' }"
         ref="polyline"
         :editable="false"
-      ></google-polyline>
-      <!--
-      <google-marker
-        :key="index"
-        v-for="(m, index) in lineCoordinates"
-        :position="m.position"
-        :clickable="true"
-        :draggable="false"
-        @click="center = (m.lat, m.lng)"
-      />
-      -->
+      ></google-polyline> -->
+
+      <google-polygon
+        v-bind:path.sync="lineCoordinates"
+        v-bind:options="{ strokeColor: '#008000' }"
+        ref="polygon"
+        :editable="false"
+      ></google-polygon>
       ></google-map
     >
     <div class="container">
       <div class="row justify-content-center">
         <h1>Roof Metrics</h1>
         <p>Surface: {{ this.roofMetrics.surface }} m<sup>2</sup></p>
-        <p>System Performance: {{ this.roofMetrics.surface / 10 }} kwP</p>
-        <p>
-          Elictricity Yield: {{ (this.roofMetrics.surface / 10) * 1000 }} kWh/a
-        </p>
+        <p>System Performance: {{ this.roofMetrics.performance }} kwP</p>
+        <p>Elictricity Yield: {{ this.roofMetrics.yield }} kWh/a</p>
       </div>
     </div>
   </div>
@@ -137,12 +131,13 @@ export default {
         lng: 0,
       },
       zoom: 12,
-      savedMarkers: [],
       address: "",
       lineCoordinates: [],
       roofMetrics: {
         distances: [],
         surface: 0, //m2
+        performance: 0,
+        yield: 0,
       },
     };
   },
@@ -205,26 +200,12 @@ export default {
     },
 
     onClickMap(e) {
-      var marker = {
-        position: e.latLng.toJSON(),
-      };
-      console.log(marker.position);
-      this.savedMarkers.push(marker);
       let coordinateObject = {
         lat: e.latLng.toJSON().lat,
         lng: e.latLng.toJSON().lng,
       };
+      this.lineCoordinates.push(coordinateObject);
 
-      if (this.lineCoordinates.length == 0) {
-        this.lineCoordinates.push(coordinateObject);
-        this.lineCoordinates.push(coordinateObject);
-      } else {
-        this.lineCoordinates.splice(
-          this.lineCoordinates.length - 1,
-          0,
-          coordinateObject
-        );
-      }
       this.calculateRoofArea();
     },
     calculateRoofArea() {
@@ -241,10 +222,11 @@ export default {
         this.roofMetrics.surface = surfaceCalculator(
           this.roofMetrics.distances
         );
+        this.roofMetrics.performance = this.roofMetrics.surface / 10;
+        this.roofMetrics.yield = this.roofMetrics.performance * 1000;
       }
     },
     onClickClearMarkers() {
-      this.savedMarkers = [];
       this.lineCoordinates = [];
       this.roofMetrics.surface = 0;
     },
