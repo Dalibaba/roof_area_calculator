@@ -85,26 +85,42 @@
     >
       <!-- <div v-if="savedMarkers.length > 0"></div> -->
       <google-polyline
-        v-bind:path.sync="paths"
+        v-bind:path.sync="lineCoordinates"
         v-bind:options="{ strokeColor: '#008000' }"
         ref="polyline"
         :editable="false"
       ></google-polyline>
+      <!--
       <google-marker
         :key="index"
-        v-for="(m, index) in savedMarkers"
+        v-for="(m, index) in lineCoordinates"
         :position="m.position"
         :clickable="true"
         :draggable="false"
-        @click="center = m.position"
+        @click="center = (m.lat, m.lng)"
       />
+      -->
       ></google-map
     >
+    <div class="container">
+      <div class="row justify-content-center">
+        <h1>Roof Metrics</h1>
+        <p>Surface: {{ this.roofMetrics.surface }} m<sup>2</sup></p>
+        <p>System Performance: {{ this.roofMetrics.surface / 10 }} kwP</p>
+        <p>
+          Elictricity Yield: {{ (this.roofMetrics.surface / 10) * 1000 }} kWh/a
+        </p>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import axios from "axios";
+import {
+  distanceCalculator,
+  surfaceCalculator,
+} from "../utilities/GeoCalculator.js";
 
 export default {
   data() {
@@ -123,7 +139,11 @@ export default {
       zoom: 12,
       savedMarkers: [],
       address: "",
-      paths: [],
+      lineCoordinates: [],
+      roofMetrics: {
+        distances: [],
+        surface: 0, //m2
+      },
     };
   },
   created() {
@@ -188,22 +208,45 @@ export default {
       var marker = {
         position: e.latLng.toJSON(),
       };
+      console.log(marker.position);
       this.savedMarkers.push(marker);
-      let pathObject = {
+      let coordinateObject = {
         lat: e.latLng.toJSON().lat,
         lng: e.latLng.toJSON().lng,
       };
 
-      if (this.paths.length == 0) {
-        this.paths.push(pathObject);
-        this.paths.push(pathObject);
+      if (this.lineCoordinates.length == 0) {
+        this.lineCoordinates.push(coordinateObject);
+        this.lineCoordinates.push(coordinateObject);
       } else {
-        this.paths.splice(this.paths.length - 1, 0, pathObject);
+        this.lineCoordinates.splice(
+          this.lineCoordinates.length - 1,
+          0,
+          coordinateObject
+        );
+      }
+      this.calculateRoofArea();
+    },
+    calculateRoofArea() {
+      this.roofMetrics.distances = [];
+      if (this.lineCoordinates.length > 3) {
+        for (var i = 0; i < this.lineCoordinates.length - 1; i++) {
+          let lat1 = this.lineCoordinates[i].lat;
+          let lng1 = this.lineCoordinates[i].lng;
+          let lat2 = this.lineCoordinates[i + 1].lat;
+          let lng2 = this.lineCoordinates[i + 1].lng;
+          var distance = distanceCalculator(lat1, lng1, lat2, lng2);
+          this.roofMetrics.distances.push(distance);
+        }
+        this.roofMetrics.surface = surfaceCalculator(
+          this.roofMetrics.distances
+        );
       }
     },
     onClickClearMarkers() {
       this.savedMarkers = [];
-      this.paths = [];
+      this.lineCoordinates = [];
+      this.roofMetrics.surface = 0;
     },
   },
 
