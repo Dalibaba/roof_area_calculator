@@ -1,5 +1,8 @@
 # roof_area_calculator
 
+## About
+Using the google maps api for locating addresses on the map. Calculating roof area by creating Polygons.
+
 ## Project setup
 ```
 npm install
