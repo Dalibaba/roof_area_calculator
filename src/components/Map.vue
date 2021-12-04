@@ -2,55 +2,66 @@
   <div>
     <div class="container">
       <div class="row">
-        <div class="col-sm-10">
+        <div class="col">
           <h1>Roof Area Calculator</h1>
           <hr />
         </div>
       </div>
-      <div class="form-group">
-        <input
-          type="text"
-          v-model="formData.city"
-          class="form-control"
-          id="cityInput"
-          placeholder="City"
-        />
-      </div>
-      <div class="form-group">
-        <input
-          type="text"
-          v-model="formData.zip"
-          class="form-control"
-          id="zipInput"
-          placeholder="zip"
-          pattern="[0-9]*"
-        />
-      </div>
-      <div class="form-group">
-        <input
-          type="text"
-          v-model="formData.street"
-          class="form-control"
-          id="streetInput"
-          placeholder="street"
-        />
-      </div>
-      <div class="form-group">
-        <input
-          type="number"
-          v-model="formData.houseNumber"
-          class="form-control"
-          id="houseNumberInput"
-          placeholder="House Number"
-        />
-      </div>
-      <div class="container">
+    </div>
+    <div class="container mb-2">
+      <form role="form">
         <div class="row justify-content-center">
-          <button
-            type="button"
-            class="btn btn-success btn-sm"
-            @click="onClickFind"
-          >
+          <div class="form-group col-lg-3 mb-2">
+            <input
+              type="text"
+              v-model="formData.city"
+              class="form-control"
+              id="cityInput"
+              placeholder="City"
+            />
+          </div>
+        </div>
+        <div class="row justify-content-center">
+          <div class="form-group col-lg-3 mb-2">
+            <input
+              type="text"
+              v-model="formData.zip"
+              class="form-control"
+              id="zipInput"
+              placeholder="zip"
+              pattern="[0-9]*"
+            />
+          </div>
+        </div>
+        <div class="row justify-content-center">
+          <div class="form-group col-lg-3 mb-2">
+            <input
+              type="text"
+              v-model="formData.street"
+              class="form-control"
+              id="streetInput"
+              placeholder="street"
+            />
+          </div>
+        </div>
+        <div class="row justify-content-center">
+          <div class="form-group col-lg-3 mb-2">
+            <input
+              type="number"
+              v-model="formData.houseNumber"
+              class="form-control"
+              id="houseNumberInput"
+              min="0"
+              placeholder="House Number"
+            />
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="container mb-2">
+      <div class="row">
+        <div class="col">
+          <button type="button" class="btn btn-success" @click="onClickFind">
             Find on Map
           </button>
         </div>
@@ -58,52 +69,51 @@
     </div>
 
     <div class="container">
-      <div class="row justify-content-center">
-        <h1>Your coordinates:</h1>
-        <p>
-          {{ myCoordinates.lat }} Latitude, {{ myCoordinates.lng }} Longitude
-        </p>
+      <div class="card">
+        <div class="row justify-content-center">
+          <h4>Your coordinates:</h4>
+          <p>
+            {{ myCoordinates.lat.toFixed(4) }} Latitude,
+            {{ myCoordinates.lng.toFixed(4) }} Longitude
+          </p>
+        </div>
+        <div class="row">
+          <div class="col">
+            <button
+              type="button"
+              class="btn btn-warning"
+              @click="onClickClearMarkers"
+            >
+              Clear Markers
+            </button>
+          </div>
+        </div>
+        <div class="row">
+          <google-map
+            @click="onClickMap"
+            :center="myCoordinates"
+            :zoom="zoom"
+            style="width: 70%; height: 500px; margin: 32px auto"
+            ref="mapRef"
+            @dragend="handleDrag"
+          >
+            <google-polygon
+              v-bind:path.sync="outerCoords"
+              v-bind:options="{ strokeColor: '#008000' }"
+              ref="polygon"
+              :editable="false"
+            ></google-polygon>
+            ></google-map
+          >
+        </div>
       </div>
     </div>
     <div class="container">
-      <button
-        type="button"
-        class="btn btn-success btn-sm"
-        @click="onClickClearMarkers"
-      >
-        Clear Markers
-      </button>
-    </div>
-    <div class="container"></div>
-    <google-map
-      @click="onClickMap"
-      :center="myCoordinates"
-      :zoom="zoom"
-      style="width: 70%; height: 500px; margin: 32px auto"
-      ref="mapRef"
-      @dragend="handleDrag"
-    >
-      <!-- <google-polyline
-        v-bind:path.sync="lineCoordinates"
-        v-bind:options="{ strokeColor: '#008000' }"
-        ref="polyline"
-        :editable="false"
-      ></google-polyline> -->
-
-      <google-polygon
-        v-bind:path.sync="lineCoordinates"
-        v-bind:options="{ strokeColor: '#008000' }"
-        ref="polygon"
-        :editable="false"
-      ></google-polygon>
-      ></google-map
-    >
-    <div class="container">
       <div class="row justify-content-center">
-        <h1>Roof Metrics</h1>
-        <p>Surface: {{ this.roofMetrics.surface }} m<sup>2</sup></p>
-        <p>System Performance: {{ this.roofMetrics.performance }} kwP</p>
-        <p>Elictricity Yield: {{ this.roofMetrics.yield }} kWh/a</p>
+        <h4>Roof Metrics</h4>
+        <p>Surface: {{ this.roofMetrics.surface }} [m<sup>2</sup>]</p>
+        <p>System Performance: {{ this.roofMetrics.performance }} [kwP]</p>
+        <p>Elictricity Yield: {{ this.roofMetrics.yield }} [kWh/a]</p>
       </div>
     </div>
   </div>
@@ -132,7 +142,7 @@ export default {
       },
       zoom: 12,
       address: "",
-      lineCoordinates: [],
+      outerCoords: [],
       roofMetrics: {
         distances: [],
         surface: 0, //m2
@@ -194,40 +204,51 @@ export default {
       }
 
       const geocodedLocation = data.results[0];
-      this.myCoordinates.lat = geocodedLocation.geometry.location.lat;
-      this.myCoordinates.lng = geocodedLocation.geometry.location.lng;
+      this.myCoordinates.lat =
+        geocodedLocation.geometry.location.lat.toFixed(4);
+      this.myCoordinates.lng =
+        geocodedLocation.geometry.location.lng.toFixed(4);
       this.zoom = 20;
     },
 
     onClickMap(e) {
-      let coordinateObject = {
-        lat: e.latLng.toJSON().lat,
-        lng: e.latLng.toJSON().lng,
-      };
-      this.lineCoordinates.push(coordinateObject);
-
-      this.calculateRoofArea();
-    },
-    calculateRoofArea() {
-      this.roofMetrics.distances = [];
-      if (this.lineCoordinates.length > 3) {
-        for (var i = 0; i < this.lineCoordinates.length - 1; i++) {
-          let lat1 = this.lineCoordinates[i].lat;
-          let lng1 = this.lineCoordinates[i].lng;
-          let lat2 = this.lineCoordinates[i + 1].lat;
-          let lng2 = this.lineCoordinates[i + 1].lng;
-          var distance = distanceCalculator(lat1, lng1, lat2, lng2);
-          this.roofMetrics.distances.push(distance);
-        }
-        this.roofMetrics.surface = surfaceCalculator(
-          this.roofMetrics.distances
-        );
-        this.roofMetrics.performance = this.roofMetrics.surface / 10;
-        this.roofMetrics.yield = this.roofMetrics.performance * 1000;
+      // rectangle sized roof
+      if (this.outerCoords.length < 4) {
+        let coordinateObject = {
+          lat: e.latLng.toJSON().lat,
+          lng: e.latLng.toJSON().lng,
+        };
+        this.outerCoords.push(coordinateObject);
+      }
+      if (this.outerCoords.length == 4) {
+        this.calculateRoofArea();
       }
     },
+    calculateRoofArea() {
+      for (var i = 0; i < this.outerCoords.length - 1; i++) {
+        let lat1 = this.outerCoords[i].lat;
+        let lng1 = this.outerCoords[i].lng;
+        let lat2 = this.outerCoords[i + 1].lat;
+        let lng2 = this.outerCoords[i + 1].lng;
+        var distance = distanceCalculator(lat1, lng1, lat2, lng2);
+        this.roofMetrics.distances.push(distance);
+
+        if (i == this.outerCoords.length - 2) {
+          let lat1 = this.outerCoords[0].lat;
+          let lng1 = this.outerCoords[0].lng;
+          let lat2 = this.outerCoords[3].lat;
+          let lng2 = this.outerCoords[3].lng;
+          distance = distanceCalculator(lat1, lng1, lat2, lng2);
+          this.roofMetrics.distances.push(distance);
+        }
+      }
+      this.roofMetrics.surface = surfaceCalculator(this.roofMetrics.distances);
+      this.roofMetrics.performance = (this.roofMetrics.surface / 10).toFixed(4);
+      this.roofMetrics.yield = (this.roofMetrics.performance * 1000).toFixed(4);
+    },
     onClickClearMarkers() {
-      this.lineCoordinates = [];
+      this.outerCoords = [];
+      this.roofMetrics.distances = [];
       this.roofMetrics.surface = 0;
     },
   },
@@ -248,3 +269,17 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+/* End global styles */
+.card {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  transition: 0.3s;
+  margin-bottom: 20px;
+  border-radius: 10px;
+}
+/* On mouse-over, add a deeper shadow */
+.card:hover {
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+}
+</style>
