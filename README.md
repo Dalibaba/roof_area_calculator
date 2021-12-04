@@ -3,6 +3,9 @@
 ## About
 Using the google maps api for locating addresses on the map. Calculating roof area by creating Polygons.
 
+![Alt text](src/assets/map.png?raw=true "Title")
+
+
 ## Project setup
 ```
 npm install
