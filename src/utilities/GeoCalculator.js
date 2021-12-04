@@ -1,3 +1,13 @@
+/**
+ * Returns distance between two geocoordinates
+ *
+ * @param {number} lat1 latitude of first coordinate.
+ * @param {number} lon1 longitude of first coordinate.
+ * @param {number} lat2 latitude of second coordinate.
+ * @param {number} lon2 longitude of second coordinate.
+ * @return {number} d distance between geocoordinates
+ */
+
 function distanceCalculator(lat1, lon1, lat2, lon2) {
   const R = 6371e3; // metres
   const φ1 = (lat1 * Math.PI) / 180; // φ, λ in radians
@@ -13,6 +23,13 @@ function distanceCalculator(lat1, lon1, lat2, lon2) {
   const d = R * c; // in metres
   return d;
 }
+
+/**
+ * Calculates surface of a rectangle by taking the average side
+ *
+ * @param {array} array of 4 distance values
+ * @return {number} surface of rectangle
+ */
 
 function surfaceCalculator(distanceArray) {
   if (distanceArray.length == 4) {

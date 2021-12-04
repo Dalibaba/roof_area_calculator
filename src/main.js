@@ -13,10 +13,12 @@ Vue.use(VueGoogleMaps, {
   installComponents: true,
 });
 
+// name google components
+
 Vue.component("google-map", VueGoogleMaps.Map);
-Vue.component("google-marker", VueGoogleMaps.Marker);
-Vue.component("google-polyline", VueGoogleMaps.Polyline);
 Vue.component("google-polygon", VueGoogleMaps.Polygon);
+Vue.component("google-info-window", VueGoogleMaps.InfoWindow);
+Vue.component("google-marker", VueGoogleMaps.Marker);
 new Vue({
   render: (h) => h(App),
 }).$mount("#app");

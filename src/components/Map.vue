@@ -17,7 +17,7 @@
               v-model="formData.city"
               class="form-control"
               id="cityInput"
-              placeholder="City"
+              placeholder="city"
             />
           </div>
         </div>
@@ -52,7 +52,7 @@
               class="form-control"
               id="houseNumberInput"
               min="0"
-              placeholder="House Number"
+              placeholder="house number"
             />
           </div>
         </div>
@@ -70,14 +70,48 @@
 
     <div class="container">
       <div class="card">
-        <div class="row justify-content-center">
+        <div class="row justify-content-center mt-2">
           <h4>Your coordinates:</h4>
           <p>
             {{ myCoordinates.lat.toFixed(4) }} Latitude,
             {{ myCoordinates.lng.toFixed(4) }} Longitude
           </p>
         </div>
-        <div class="row">
+        <div class="justify-content-center">
+          <h5>Mark your roof on the map!</h5>
+        </div>
+        <google-map
+          @click="onClickMap"
+          :center="myCoordinates"
+          :zoom="zoom"
+          style="width: 70%; height: 500px; margin: 6px auto"
+          ref="mapRef"
+          @dragend="handleDrag"
+        >
+          <google-polygon
+            v-bind:path.sync="outerCoords"
+            v-bind:options="{ strokeColor: '#008000' }"
+            ref="polygon"
+            :editable="false"
+          ></google-polygon>
+          <google-marker
+            :position="myCoordinates"
+            :clickable="false"
+            :draggable="false"
+            @click="center = m.position"
+          />
+          <gmap-info-window
+            :options="infoOptions"
+            :position="infoWindowPos"
+            :opened="infoWinOpen"
+            @closeclick="infoWinOpen = false"
+          >
+            <div v-html="infoContent"></div>
+          </gmap-info-window>
+          ></google-map
+        >
+
+        <div class="row mb-2">
           <div class="col">
             <button
               type="button"
@@ -88,32 +122,6 @@
             </button>
           </div>
         </div>
-        <div class="row">
-          <google-map
-            @click="onClickMap"
-            :center="myCoordinates"
-            :zoom="zoom"
-            style="width: 70%; height: 500px; margin: 32px auto"
-            ref="mapRef"
-            @dragend="handleDrag"
-          >
-            <google-polygon
-              v-bind:path.sync="outerCoords"
-              v-bind:options="{ strokeColor: '#008000' }"
-              ref="polygon"
-              :editable="false"
-            ></google-polygon>
-            ></google-map
-          >
-        </div>
-      </div>
-    </div>
-    <div class="container">
-      <div class="row justify-content-center">
-        <h4>Roof Metrics</h4>
-        <p>Surface: {{ this.roofMetrics.surface }} [m<sup>2</sup>]</p>
-        <p>System Performance: {{ this.roofMetrics.performance }} [kwP]</p>
-        <p>Elictricity Yield: {{ this.roofMetrics.yield }} [kWh/a]</p>
       </div>
     </div>
   </div>
@@ -142,6 +150,18 @@ export default {
       },
       zoom: 12,
       address: "",
+      infoContent: "test",
+      infoWindowPos: {
+        lat: 0,
+        lng: 0,
+      },
+      infoWinOpen: false,
+      infoOptions: {
+        pixelOffset: {
+          width: 0,
+          height: -35,
+        },
+      },
       outerCoords: [],
       roofMetrics: {
         distances: [],
@@ -204,10 +224,12 @@ export default {
       }
 
       const geocodedLocation = data.results[0];
-      this.myCoordinates.lat =
-        geocodedLocation.geometry.location.lat.toFixed(4);
-      this.myCoordinates.lng =
-        geocodedLocation.geometry.location.lng.toFixed(4);
+      this.myCoordinates.lat = parseFloat(
+        geocodedLocation.geometry.location.lat.toFixed(4)
+      );
+      this.myCoordinates.lng = parseFloat(
+        geocodedLocation.geometry.location.lng.toFixed(4)
+      );
       this.zoom = 20;
     },
 
@@ -222,6 +244,7 @@ export default {
       }
       if (this.outerCoords.length == 4) {
         this.calculateRoofArea();
+        this.formatInfoWindow();
       }
     },
     calculateRoofArea() {
@@ -250,6 +273,23 @@ export default {
       this.outerCoords = [];
       this.roofMetrics.distances = [];
       this.roofMetrics.surface = 0;
+      this.roofMetrics.performance = 0;
+      this.roofMetrics.yield = 0;
+      this.infoWinOpen = false;
+      this.infoContent = "";
+    },
+    formatInfoWindow() {
+      this.infoWindowPos.lat = this.outerCoords[0].lat;
+      this.infoWindowPos.lng = this.outerCoords[0].lng;
+      this.infoWinOpen = true;
+
+      this.infoContent = `      
+      <h6>Roof Metrics</h6>
+      <div>
+        <p>Surface: ${this.roofMetrics.surface} [m<sup>2</sup>]</p>
+        <p>System Performance: ${this.roofMetrics.performance} [kwP]</p>
+        <p>Elictricity Yield: ${this.roofMetrics.yield} [kWh/a]</p>
+      </div>`;
     },
   },
 
