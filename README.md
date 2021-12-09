@@ -3,7 +3,7 @@
 ## About
 Using the google maps api for locating addresses on the map. Calculating roof area by creating Polygons.
 
-![Alt text](src/assets/map.png?raw=true "Title")
+![Alt text](src/assets/map.PNG?raw=true "Title")
 
 
 ## Project setup
